@@ -25,7 +25,7 @@ struct queue
 struct qentry
 {
 	pid32 pid;	// TODO - process ID
-	int32 key;  // this is not a pri16 because XINU hates us
+	int32 key;  // priority
 	struct qentry *next;	// TODO - other members
 	struct qentry *prev;
 };

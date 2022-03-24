@@ -2,6 +2,7 @@
 
 #include <xinu.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /**
  * Prints out contents of a queue
@@ -83,38 +84,50 @@ pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 	// insert into queue
 
 	struct qentry *curr = q->head;
-	while (curr != NULL){
+	bool inserted = false;
+	while (curr != NULL && inserted == false){
 		int32 currKey = curr->key;
+		struct qentry *temp;
 		if (key > currKey){
+			if (curr != q->head){
+				temp = curr->prev;
+				temp->next = newEntry;
+			}
 			newEntry->prev = curr->prev;
-			curr->prev = newEntry;
 			newEntry->next = curr;
+			curr->prev = newEntry;
 			if (curr == q->head){
-				newEntry->prev = NULL;
-				
 				//update Queue head to point to new entry
 				q->head = newEntry;
 			}
+			inserted = true;
 		}
-		else if (key == currKey){
-			newEntry->prev = curr;
-			newEntry->next = curr->next;
-			curr->next = newEntry;
+		else if (key == currKey && curr != q->tail){
+			temp = curr->next;
+			if (temp->key != currKey){
+				temp->prev = newEntry;
+				newEntry->next = temp;
+				newEntry->prev = curr;
+				curr->next = newEntry;
+				inserted = true;
+			}
 		}
-		else if (key < currKey && curr == q->tail){
+		else if (key <= currKey && curr == q->tail){
 			struct qentry *tailEntry = q->tail;
-			if (tailEntry != NULL)
+			if (tailEntry != NULL){
 				tailEntry->next = newEntry;
-
+			}
 			//update Queue tail to point to new entry
 			q->tail = newEntry;
+			inserted = true;
 		}
 		curr = curr->next;
 	}
 
 	//update Queue head if needed
-	if (q->head == NULL)
+	if (q->head == NULL){
 		q->head = newEntry;
+	}
 
 	//update queue size
 	q->size++;

@@ -30,7 +30,6 @@ void	resched(void)		// assumes interrupts are disabled
                 enqueue(currpid, readyqueue, key);
         }
 
-        // Force context switch to next ready process
 		// TODO - set currpid to reflect new running process' PID
         currpid = dequeue(readyqueue);
 		// TODO - dequeue next process off the ready queue and point ptnew to it

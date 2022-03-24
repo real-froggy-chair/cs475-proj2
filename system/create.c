@@ -47,6 +47,7 @@ pid32	create(void *procaddr, uint32 ssize, pri16 priority, char *name, uint32 na
 	prptr->prsem = -1;
 	prptr->prparent = (pid32)getpid();
 	prptr->prhasmsg = FALSE;
+	prptr->prprio = priority;
 
 	// set up initial device descriptors for the shell
 	prptr->prdesc[0] = CONSOLE;	// stdin  is CONSOLE device
