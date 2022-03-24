@@ -65,7 +65,7 @@ bool8	isfull(struct queue *q)
  *
  * @return pid on success, SYSERR otherwise
  */
-pid32 enqueue(pid32 pid, struct queue *q)
+pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 {
 	if (isfull(q) || isbadpid(pid)) {
 		return SYSERR;
@@ -75,11 +75,17 @@ pid32 enqueue(pid32 pid, struct queue *q)
 	struct qentry *newEntry = (struct qentry*) malloc(sizeof(struct qentry));
 
 	//TODO - initialize the new QEntry
-	newEntry->pid = pid;
+	newEntry->pid  = pid;
 	newEntry->prev = q->tail;
 	newEntry->next = NULL;
+	newEntry->key  = key;
 
 	//TODO - insert into tail of queue
+	int i;
+	for(i = 0; i < q->size; i++)
+	{
+		
+	}
 
 	//link the new entry to the last queue entry
 	struct qentry *tailEntry = q->tail;
