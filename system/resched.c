@@ -22,24 +22,21 @@ void	resched(void)		// assumes interrupts are disabled
 
 	ptold = &proctab[currpid];
 
+		// TODO - check ptold's state. If it's running, put it on the ready queue and change state to ready
         if (ptold->prstate == PR_CURR) {
                 // Old process got preempted; place back on ready queue
                 ptold->prstate = PR_READY;
-                enqueue(currpid, readyqueue);
+				pri16 key = ptold->prprio;
+                enqueue(currpid, readyqueue, key);
         }
 
         // Force context switch to next ready process
+		// TODO - set currpid to reflect new running process' PID
         currpid = dequeue(readyqueue);
+		// TODO - dequeue next process off the ready queue and point ptnew to it
         ptnew = &proctab[currpid];
+		// TODO - change its state to "current" (i.e., running)
         ptnew->prstate = PR_CURR;
-// DC REMOVE END 
-	// TODO - check ptold's state. If it's running, put it on the ready queue and change state to ready
-
-	// TODO - dequeue next process off the ready queue and point ptnew to it
-
-	// TODO - change its state to "current" (i.e., running)
-
-	// TODO - set currpid to reflect new running process' PID
 
 	// Context switch to next ready process
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);

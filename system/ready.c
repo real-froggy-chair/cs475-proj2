@@ -23,8 +23,11 @@ status	ready(pid32 pid, bool8 resch)
 	// TODO - set the process' state pointed by prptr to "ready"
 	prptr->prstate = PR_READY;	//DC REMOVE
 
+	// get priority of process
+	pri16 key = prptr->prprio;
+
 	// TODO - enqueue the process
-	enqueue(pid, readyqueue); //DC REMOVE
+	enqueue(pid, readyqueue, key); //DC REMOVE
 
 	if (resch == RESCHED_YES)
 		resched();
