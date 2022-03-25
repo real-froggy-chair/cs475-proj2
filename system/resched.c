@@ -35,15 +35,15 @@ void	resched(void)		// assumes interrupts are disabled
                 enqueue(currpid, readyqueue, key);
         }
 		
-		//kprintf("READY TO DEQUEUE!\n");
+		kprintf("READY TO DEQUEUE!\n");
 		// TODO - set currpid to reflect new running process' PID
         currpid = dequeue(readyqueue);
-		//kprintf("DEQUEUED!\n");
+		kprintf("DEQUEUED!\n");
 		// TODO - dequeue next process off the ready queue and point ptnew to it
         ptnew = &proctab[currpid];
 		// TODO - change its state to "current" (i.e., running)
         ptnew->prstate = PR_CURR;
-		if (AGING == 1 && !isempty(readyqueue)){
+		if (AGING == 1){
 			//kprintf("AGE!\n");
 			// increase variable tracking the number of times this process has been scheduled
 			ptnew->timessched = ptnew->timessched + 1;
@@ -51,34 +51,30 @@ void	resched(void)		// assumes interrupts are disabled
 			struct procent *ptleast; // ptr to table entry for least scheduled process
 			bool b = false; // tracks whether first process to investigate has been found 
 			pid32 leastSched = 2; // find process that has been scheduled the least
-			pid32 nextpid = 2;
-			uint32	i;
-			i = 2;
-			while (b == false && i < prcount-1){
-				if (i != ptoldpid && i != currpid){
-					leastSched = nextpid;
-					b = true;
+			struct qentry *curr = readyqueue->head;
+			while (b == false && curr != NULL){
+				if (curr->pid != ptoldpid){
+					leastSched = curr->pid;
 				}
-				i++;
-				nextpid++;
+				curr = curr->next;
 			}
-			nextpid = 2;
-			for (i = 2; i < prcount-1; i++) {
-				if (i != ptoldpid && i != currpid){
-					if (proctab[i].timessched < proctab[leastSched].timessched){
-						leastSched = nextpid;
+			curr = readyqueue->head;
+			while (curr != NULL){
+				if (curr->pid != ptoldpid){
+					if (proctab[curr->pid].timessched < proctab[leastSched].timessched){
+						leastSched = curr->pid;
 					}
 				}
-				nextpid++;
+				curr = curr->next;
 			}
 			//kprintf("Age process %d (%s)\r\n", leastSched, proctab[leastSched].prname);
 			ptleast = &proctab[leastSched];
-			ptleast->prprio = ptleast->prprio + 10;
+			ptleast->prprio = ptleast->prprio + 1;
 			kprintf("Aged process priority: %d\r\n", ptleast->prprio);
 			remove(leastSched, readyqueue);
 			pri16 agekey = ptleast->prprio;
 			enqueue(leastSched, readyqueue, agekey);
-			//kprintf("Enqueued aged process\r\n");
+			kprintf("Enqueued aged process\r\n");
 		}
 
 	// Context switch to next ready process
