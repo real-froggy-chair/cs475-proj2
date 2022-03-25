@@ -65,6 +65,10 @@ typedef	int32	status;		/* returned status value (OK/SYSERR)	*/
 
 #define	NULLSTK		16384	/* stack size for null process		*/
 
+/* Whether the aging policy is imposed */
+
+#define AGING 1 /* False			*/
+
 /* Prototypes of I/O functions used throughout the kernel */
 
 syscall	kprintf(char *fmt, ...);

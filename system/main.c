@@ -31,7 +31,7 @@ int	main(uint32 argc, uint32 *argv)
 	static uint32 *args1 = args;
 	static uint32 args2[] = {10, 20, 30, 40, 50, 60};
 
-	kprintf("Hello XINU WORLD!\r\n");
+	kprintf("HELLO XINU WORLD!\r\n");
 
 	//priority of process is input as the 3rd argument of create()
 	ready(create((void*) printpid, INITSTK, 1, "PRINTER-1", 2, 1, args1++), FALSE);

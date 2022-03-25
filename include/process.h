@@ -57,6 +57,7 @@ struct procent {		/* entry in the process table		*/
 	bool8	prhasmsg;	/* nonzero iff msg is valid		*/
 	int16	prdesc[NDESC];	/* device descriptors for process	*/
 	pri16	prprio;		/*  process priority */
+	int32 timessched; /* times process has been scheduled */
 };
 
 /* Marker for the top of a process stack (used to help detect overflow)	*/

@@ -72,6 +72,8 @@ pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 		return SYSERR;
 	}
 
+	//kprintf("Enqueue process %d (%s)\r\n", pid, proctab[pid].prname);
+
 	//TODO - allocate space on heap for a new qentry
 	struct qentry *newEntry = (struct qentry*) malloc(sizeof(struct qentry));
 
@@ -132,6 +134,8 @@ pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 	//update queue size
 	q->size++;
 
+	//kprintf("Head process %d (%s)\r\n", q->head->pid, proctab[q->head->pid].prname);
+
 	return pid;
 }
 
@@ -148,6 +152,7 @@ pid32 dequeue(struct queue *q)
 	if (isempty(q)) {
 		return EMPTY;
 	}
+	kprintf("NOT EMPTY!\n");
 
 	//TODO - get the head entry of the queue
 
@@ -162,6 +167,8 @@ pid32 dequeue(struct queue *q)
 	//save pid of head entry
 	pid = head->pid;
 
+	kprintf("HERE 1!\n");
+
 	//unlink head from queue
 	if (newHead != NULL)
 		newHead->prev = NULL;
@@ -170,12 +177,14 @@ pid32 dequeue(struct queue *q)
 
 	//update queue to point head pointer at newhead
 	q->head = newHead;
+	kprintf("HERE 2!\n");
 
 	//decrement size of queue
 	q->size--;
 
 	//deallocate head entry
 	free(head, sizeof(struct qentry));
+	kprintf("HERE 3!\n");
 
 	return pid;
 }
