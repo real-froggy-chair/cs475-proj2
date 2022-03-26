@@ -67,7 +67,7 @@ typedef	int32	status;		/* returned status value (OK/SYSERR)	*/
 
 /* Whether the aging policy is imposed */
 
-#define AGING 1 /* False			*/
+#define AGING TRUE
 
 /* Prototypes of I/O functions used throughout the kernel */
 
