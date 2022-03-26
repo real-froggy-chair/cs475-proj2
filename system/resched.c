@@ -22,7 +22,7 @@ void	resched(void)		// assumes interrupts are disabled
 	// DC REMOVE
 
 	ptold = &proctab[currpid];
-	pid32 ptoldpid = currpid;
+	pid32 ptoldpid = currpid; // save pid of ptold
 
 		// TODO - check ptold's state. If it's running, put it on the ready queue and change state to ready
         if (ptold->prstate == PR_CURR) {
@@ -64,8 +64,7 @@ void	resched(void)		// assumes interrupts are disabled
 			}
 			if (leastSched != ptoldpid && leastSched != NULL && curr->pid > 1){
 				ptleast = &proctab[leastSched];
-				ptleast->prprio = ptleast->prprio + 2;
-				//kprintf("3/5 = %d\n", 3/5);
+				ptleast->prprio = ptleast->prprio + 5;
 				remove(leastSched, readyqueue);
 				pri16 agekey = ptleast->prprio;
 				enqueue(leastSched, readyqueue, agekey);
