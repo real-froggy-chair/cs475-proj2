@@ -73,14 +73,8 @@ pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 		return SYSERR;
 	}
 
-	kprintf("Enqueue process %d (%s)\r\n", pid, proctab[pid].prname);
-
 	//TODO - allocate space on heap for a new qentry
 	struct qentry *newEntry = (struct qentry*) malloc(sizeof(struct qentry));
-	if(newEntry == NULL)
-		kprintf("ALLOCATION FAIL\n");
-	else
-		kprintf("ALLOCATION PASS\n");
 
 	//TODO - initialize the new QEntry
 	newEntry->pid  = pid;
@@ -88,31 +82,33 @@ pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 	newEntry->next = NULL;
 	newEntry->key  = key;
 
-	kprintf("newEntry [%d] w/ key of [%d]\n", newEntry->pid, newEntry->key);
+	// insert into queue
 
-	// insert into queue (PRINTER-1 DOESN'T HIT ANY OF THESE)
-
+	bool inserted = false;
+	if (isempty(q)){
+		q->head = newEntry;
+		q->tail = newEntry;
+		inserted = true;
+	}
 	struct qentry *curr = q->head;
 	struct qentry *temp;
-	bool inserted = false;
-	while (curr != NULL && inserted == false){
+	while (inserted == false && curr != NULL){
 		int32 currKey = curr->key;
 		if (key > currKey){
 			if (curr != q->head){
-				temp = curr->prev;
-				temp->next = newEntry;
+				curr->prev->next = newEntry;
 			}
 			newEntry->prev = curr->prev;
 			newEntry->next = curr;
 			curr->prev = newEntry;
 			if (curr == q->head){
-				//update Queue head to point to new entry
+				// update Queue head to point to new entry if needed
 				q->head = newEntry;
 			}
 			inserted = true;
-			kprintf("[pid %d] added at first if\n");
 		}
 		else if (key == currKey && curr != q->tail){
+			// maintain FIFO: check if next entry in queue has same priority
 			temp = curr->next;
 			if (temp->key != currKey){
 				temp->prev = newEntry;
@@ -121,21 +117,13 @@ pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 				curr->next = newEntry;
 				inserted = true;
 			}
-			kprintf("[pid %d] added at second if\n");
 		}
 		else if (key <= currKey && curr == q->tail){
 			newEntry->prev = q->tail;
 			newEntry->next = NULL;
-			// insert into tail of queue
-			if (isempty(q)){
-				q->head = newEntry;
-			}
-			else{
-				q->tail->next = newEntry;
-			}
+			q->tail->next = newEntry;
 			q->tail = newEntry;
 			inserted = true;
-			kprintf("[pid %d] added at third if\n");
 		}
 		curr = curr->next;
 	}
@@ -147,8 +135,6 @@ pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 
 	//update queue size
 	q->size++;
-
-	//kprintf("Head process %d (%s)\r\n", q->head->pid, proctab[q->head->pid].prname);
 
 	return pid;
 }
