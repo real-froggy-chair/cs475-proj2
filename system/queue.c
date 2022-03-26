@@ -2,6 +2,7 @@
 
 #include <xinu.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /**
  * Prints out contents of a queue
@@ -65,9 +66,10 @@ bool8	isfull(struct queue *q)
  *
  * @return pid on success, SYSERR otherwise
  */
-pid32 enqueue(pid32 pid, struct queue *q)
+pid32 enqueue(pid32 pid, struct queue *q, int32 key)
 {
 	if (isfull(q) || isbadpid(pid)) {
+		kprintf("ERROR!\n");
 		return SYSERR;
 	}
 
@@ -75,23 +77,61 @@ pid32 enqueue(pid32 pid, struct queue *q)
 	struct qentry *newEntry = (struct qentry*) malloc(sizeof(struct qentry));
 
 	//TODO - initialize the new QEntry
-	newEntry->pid = pid;
-	newEntry->prev = q->tail;
+	newEntry->pid  = pid;
+	newEntry->prev = NULL;
 	newEntry->next = NULL;
+	newEntry->key  = key;
 
-	//TODO - insert into tail of queue
+	// insert into queue
 
-	//link the new entry to the last queue entry
-	struct qentry *tailEntry = q->tail;
-	if (tailEntry != NULL)
-		tailEntry->next = newEntry;
-
-	//update Queue tail to point to  new entry
-	q->tail = newEntry;
+	bool inserted = false;
+	if (isempty(q)){
+		q->head = newEntry;
+		q->tail = newEntry;
+		inserted = true;
+	}
+	struct qentry *curr = q->head;
+	struct qentry *temp;
+	while (inserted == false && curr != NULL){
+		int32 currKey = curr->key;
+		if (key > currKey){
+			if (curr != q->head){
+				curr->prev->next = newEntry;
+			}
+			newEntry->prev = curr->prev;
+			newEntry->next = curr;
+			curr->prev = newEntry;
+			if (curr == q->head){
+				// update Queue head to point to new entry if needed
+				q->head = newEntry;
+			}
+			inserted = true;
+		}
+		else if (key == currKey && curr != q->tail){
+			// maintain FIFO: check if next entry in queue has same priority
+			temp = curr->next;
+			if (temp->key != currKey){
+				temp->prev = newEntry;
+				newEntry->next = temp;
+				newEntry->prev = curr;
+				curr->next = newEntry;
+				inserted = true;
+			}
+		}
+		else if (key <= currKey && curr == q->tail){
+			newEntry->prev = q->tail;
+			newEntry->next = NULL;
+			q->tail->next = newEntry;
+			q->tail = newEntry;
+			inserted = true;
+		}
+		curr = curr->next;
+	}
 
 	//update Queue head if needed
-	if (q->head == NULL)
+	if (q->head == NULL){
 		q->head = newEntry;
+	}
 
 	//update queue size
 	q->size++;
@@ -208,46 +248,45 @@ pid32	getlast(struct queue *q)
  * @param q	Pointer to the queue
  * @return pid on success, SYSERR if pid is not found
  */
-pid32	remove(pid32 pid, struct queue *q)
+pid32 remove(pid32 pid, struct queue *q)
 {
-	//TODO - return EMPTY if queue is empty
-	if (isempty(q))
-	{
-		return EMPTY;
-	}
+  // TODO - return EMPTY if queue is empty
+  if (isempty(q))
+  {
+    return EMPTY;
+  }
 
-	//TODO - remove process identified by pid parameter from the queue and return its pid
+  // TODO - remove process identified by pid parameter from the queue and return its pid
 
+  // find the entry with pid
+  struct qentry *currEntry = q->head;
+  while (currEntry != NULL)
+  {
+    // found it!
+    if (currEntry->pid == pid)
+    {
+      // unlink: find next and prev entries
+      struct qentry *next = currEntry->next;
+      struct qentry *prev = currEntry->prev;
+      if (next != NULL)
+        next->prev = prev;
+      if (prev != NULL)
+        prev->next = next;
 
-	//find the entry with pid
-	struct qentry *currEntry = q->head;
-	while (currEntry != NULL)
-	{
-		//found it!
-		if (currEntry->pid == pid)
-		{
-			//unlink: find next and prev entries
-			struct qentry *next = currEntry->next;
-			struct qentry *prev = currEntry->prev;
-			if (next != NULL)
-				next->prev = prev;
-			if (prev != NULL)
-				prev->next = next;
+      // update queue structure
+      if (currEntry == q->head)
+        q->head = next;
+      if (currEntry == q->tail)
+        q->tail = prev;
+      q->size--;
 
-			//update queue structure
-			if (currEntry == q->head)
-				q->head = prev;
-			if (currEntry == q->tail)
-				q->tail = next;
-			q->size--;
+      // deallocate current entry
+      free(currEntry, sizeof(struct qentry));
+      return pid;
+    }
+    currEntry = currEntry->next;
+  }
 
-			//deallocate current entry
-			free(currEntry, sizeof(struct qentry));
-			return pid;
-		}
-		currEntry = currEntry->next;
-	}
-
-	//TODO - if pid does not exist in the queue, return SYSERR
-	return SYSERR;
+  // TODO - if pid does not exist in the queue, return SYSERR
+  return SYSERR;
 }
