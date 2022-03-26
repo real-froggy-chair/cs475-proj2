@@ -31,15 +31,15 @@ int	main(uint32 argc, uint32 *argv)
 	static uint32 *args1 = args;
 	static uint32 args2[] = {10, 20, 30, 40, 50, 60};
 
-	kprintf("HELLO XINU WORLD!\r\n");
+	kprintf("TEST CASE FOR STARVATION/AGING!\r\n");
 
 	//priority of process is input as the 3rd argument of create()
-	ready(create((void*) printpid, INITSTK, 1, "PRINTER-0", 2, 1, args1++), FALSE);
-	ready(create((void*) printpid, INITSTK, 5, "PRINTER-B", 2, 1, args1++), FALSE);
-	ready(create((void*) printpid, INITSTK, 10, "PRINTER-C", 2, 1, args1++), FALSE);
-	ready(create((void*) printpid, INITSTK, 5, "PRINTER-D", 2, 1, args1++), FALSE);
+	ready(create((void*) printpid, INITSTK, 10, "MEDIUM-PRIO-1", 2, 1, args1++), FALSE);
+	ready(create((void*) printpid, INITSTK, 1, "SMALL-PRIO-1", 2, 1, args1++), FALSE);
+	ready(create((void*) printpid, INITSTK, 15, "BIG-PRIORITY", 2, 1, args1++), FALSE);
+	ready(create((void*) printpid, INITSTK, 10, "MEDIUM-PRIO-2", 2, 1, args1++), FALSE);
+	ready(create((void*) printpid, INITSTK, 1, "SMALL-PRIO-2", 2, 1, args1++), FALSE);
 	ready(create((void*) bigargs, INITSTK, 5, "BIGARGS", 2, 6, args2), FALSE);
-	ready(create((void*) printpid, INITSTK, 1, "PRINTER-EVIL!!!!!!!!!!!!!", 2, 1, args1++), FALSE);
 
 	return 0;
 }
